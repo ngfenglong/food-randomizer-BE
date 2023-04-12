@@ -40,9 +40,28 @@ type Category struct {
 
 type PlaceCategory struct {
 	ID         int       `json:"-"`
-	MovieID    int       `json:"-"`
+	PlaceID    int       `json:"-"`
 	CategoryID int       `json:"-"`
 	Category   Category  `json:"category"`
+	CreatedAt  time.Time `json:"-"`
+	UpdatedAt  time.Time `json:"-"`
+}
+
+type Location struct {
+	ID           int       `json:"-"`
+	LocationName string    `json:"location_name"`
+	StreetName   string    `json:"street_name"`
+	Lat          string    `json:"lat"`
+	Long         string    `json:"long"`
+	CreatedAt    time.Time `json:"-"`
+	UpdatedAt    time.Time `json:"-"`
+}
+
+type PlaceLocation struct {
+	ID         int       `json:"-"`
+	PlaceID    int       `json:"-"`
+	LocationID int       `json:"-"`
+	Location   Location  `json:"location"`
 	CreatedAt  time.Time `json:"-"`
 	UpdatedAt  time.Time `json:"-"`
 }
