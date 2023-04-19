@@ -15,7 +15,7 @@ func (m *DBModel) Get(id int) (*Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `select id, name, description, is_halal, is_vegetarian, location, lat, long, created_at, updated_at, category from place where id = $1`
+	query := `select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place where id = $1`
 
 	row := m.DB.QueryRowContext(ctx, query, id)
 	var place Place
@@ -27,7 +27,7 @@ func (m *DBModel) Get(id int) (*Place, error) {
 		&place.IsVegetarian,
 		&place.Location,
 		&place.Lat,
-		&place.Long,
+		&place.Lon,
 		&place.CreatedAt,
 		&place.UpdatedAt,
 		&place.Category,
@@ -78,7 +78,7 @@ func (m *DBModel) All(category ...string) ([]*Place, error) {
 		where = fmt.Sprintf("where category =  %s)", category)
 	}
 
-	query := fmt.Sprintf(`select id, name, description, is_halal, is_vegetarian, location, lat, long, created_at, updated_at, category from place %s order by name`, where)
+	query := fmt.Sprintf(`select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place %s order by name`, where)
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (m *DBModel) All(category ...string) ([]*Place, error) {
 			&place.IsVegetarian,
 			&place.Location,
 			&place.Lat,
-			&place.Long,
+			&place.Lon,
 			&place.CreatedAt,
 			&place.UpdatedAt,
 			&place.Category,
@@ -143,7 +143,7 @@ func (m *DBModel) InsertPlace(place Place) error {
 
 	stmt := `
 		insert into place 
-		(name, description, is_halal, is_vegetarian, location, lat, long, created_at, updated_at, category) 
+		(name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category) 
 		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`
 
@@ -154,7 +154,7 @@ func (m *DBModel) InsertPlace(place Place) error {
 		place.IsVegetarian,
 		place.Location,
 		place.Lat,
-		place.Long,
+		place.Lon,
 		place.CreatedAt,
 		place.UpdatedAt,
 		place.Category,
@@ -170,7 +170,7 @@ func (m *DBModel) UpdatePlace(place Place) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `Update place set name = $1, description = $2, is_halal = $3, is_vegetarian = $4, location = $5, lat = $6, long = $7, created_at = $8 , updated_at = $9 , category = $10 where id = $11`
+	stmt := `Update place set name = $1, description = $2, is_halal = $3, is_vegetarian = $4, location = $5, lat = $6, lon = $7, created_at = $8 , updated_at = $9 , category = $10 where id = $11`
 
 	_, err := m.DB.ExecContext(ctx, stmt,
 		place.Name,
@@ -179,7 +179,7 @@ func (m *DBModel) UpdatePlace(place Place) error {
 		place.IsVegetarian,
 		place.Location,
 		place.Lat,
-		place.Long,
+		place.Lon,
 		place.CreatedAt,
 		place.UpdatedAt,
 		place.Category,

@@ -102,7 +102,7 @@ func (app *application) editPlace(w http.ResponseWriter, r *http.Request) {
 	place.IsVegetarian = payload.IsVegetarian
 	place.Location = payload.Location
 	place.Lat = " "
-	place.Long = " "
+	place.Lon = " "
 	place.CreatedAt = time.Now()
 	place.UpdatedAt = time.Now()
 
