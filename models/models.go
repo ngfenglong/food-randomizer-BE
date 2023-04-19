@@ -26,7 +26,7 @@ type Place struct {
 	IsVegetarian bool      `json:"is_vegetarian"`
 	Location     string    `json:"location"`
 	Lat          string    `json:"lat"`
-	Long         string    `json:"long"`
+	Lon          string    `json:"lon"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -52,7 +52,7 @@ type Location struct {
 	LocationName string    `json:"location_name"`
 	StreetName   string    `json:"street_name"`
 	Lat          string    `json:"lat"`
-	Long         string    `json:"long"`
+	Lon          string    `json:"lon"`
 	CreatedAt    time.Time `json:"-"`
 	UpdatedAt    time.Time `json:"-"`
 }
@@ -69,5 +69,6 @@ type PlaceLocation struct {
 type User struct {
 	ID       int
 	UserName string
+	Email    string
 	Password string
 }

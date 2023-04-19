@@ -27,5 +27,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/admin/updatePlace", app.deletePlace)
 	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteLocation/:id", app.deletePlace)
 
+	router.HandlerFunc(http.MethodPost, "/v1/auth/login", app.deletePlace)
+	router.HandlerFunc(http.MethodPost, "/v1/auth/logout", app.deletePlace)
+	router.HandlerFunc(http.MethodPost, "/v1/auth/forget-password", app.deletePlace)
+
 	return app.enableCORS(router)
 }
