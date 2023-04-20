@@ -48,7 +48,10 @@ func (app *application) getPlaceByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	place, err := app.models.DB.Get(id)
-
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
 	err = app.WriteJSON(w, http.StatusOK, place, "place")
 
 	if err != nil {

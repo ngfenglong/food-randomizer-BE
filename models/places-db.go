@@ -15,7 +15,7 @@ func (m *DBModel) Get(id int) (*Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place where id = $1`
+	query := `select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place where id = ?`
 
 	row := m.DB.QueryRowContext(ctx, query, id)
 	var place Place
@@ -32,7 +32,6 @@ func (m *DBModel) Get(id int) (*Place, error) {
 		&place.UpdatedAt,
 		&place.Category,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +42,7 @@ func (m *DBModel) Get(id int) (*Place, error) {
 	// 			place_category pc
 	// 			left join category c on (c.id = pc.category_id)
 	// 		Where
-	// 			pc.place_id = $1
+	// 			pc.place_id =?
 	// 		`
 	// rows, _ := m.DB.QueryContext(ctx, query, id)
 
@@ -111,7 +110,7 @@ func (m *DBModel) All(category ...string) ([]*Place, error) {
 		// 				place_category pc
 		// 				left join category c on (c.id = pc.category_id)
 		// 			Where
-		// 				pc.place_id = $1
+		// 				pc.place_id = ?
 		// 			`
 
 		// 	categoryRows, _ := m.DB.QueryContext(ctx, categoryQuery, place.ID)
@@ -144,7 +143,7 @@ func (m *DBModel) InsertPlace(place Place) error {
 	stmt := `
 		insert into place 
 		(name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category) 
-		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	_, err := m.DB.ExecContext(ctx, stmt,
@@ -170,7 +169,7 @@ func (m *DBModel) UpdatePlace(place Place) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `Update place set name = $1, description = $2, is_halal = $3, is_vegetarian = $4, location = $5, lat = $6, lon = $7, created_at = $8 , updated_at = $9 , category = $10 where id = $11`
+	stmt := `Update place set name = ?, description = ?, is_halal = ?, is_vegetarian = ?, location = ?, lat = ?, lon = ?, created_at = ? , updated_at = ? , category = ? where id = ?`
 
 	_, err := m.DB.ExecContext(ctx, stmt,
 		place.Name,
@@ -197,7 +196,7 @@ func (m *DBModel) DeletePlace(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := "Delete from place where id = $1"
+	stmt := "Delete from place where id = ?"
 	println(id)
 	_, err := m.DB.ExecContext(ctx, stmt, id)
 	if err != nil {
