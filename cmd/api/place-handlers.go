@@ -80,6 +80,29 @@ func (app *application) deletePlace(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) deletePlaces(w http.ResponseWriter, r *http.Request) {
+	var idList []int
+
+	err := json.NewDecoder(r.Body).Decode(&idList)
+	if err != nil {
+		app.errorJSON(w, err)
+	}
+
+	if len(idList) == 0 {
+		app.errorJSON(w, errors.New("The ID list is empty"))
+	}
+
+	err = app.models.DB.DeletePlaces(idList)
+	if err != nil {
+		app.errorJSON(w, err)
+	}
+
+	err = app.WriteJSON(w, http.StatusOK, nil, "response")
+	if err != nil {
+		app.errorJSON(w, err)
+	}
+}
+
 func (app *application) editPlace(w http.ResponseWriter, r *http.Request) {
 	var payload PlaceDto
 
@@ -91,7 +114,6 @@ func (app *application) editPlace(w http.ResponseWriter, r *http.Request) {
 
 	var place models.Place
 
-	log.Println("payload", payload)
 	if payload.ID != 0 {
 		m, _ := app.models.DB.Get(payload.ID)
 		place = *m

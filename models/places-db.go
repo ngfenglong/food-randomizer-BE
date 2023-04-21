@@ -3,7 +3,10 @@ package models
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -197,8 +200,35 @@ func (m *DBModel) DeletePlace(id int) error {
 	defer cancel()
 
 	stmt := "Delete from place where id = ?"
-	println(id)
+
 	_, err := m.DB.ExecContext(ctx, stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DBModel) DeletePlaces(idList []int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	if len(idList) == 0 {
+		return errors.New("The list is empty")
+	}
+
+	var sb strings.Builder
+	sb.WriteString("Delete from place where id in (")
+	sb.WriteString(strconv.Itoa(idList[0]))
+	for i := 1; i < len(idList); i++ {
+		sb.WriteString(",")
+		sb.WriteString(strconv.Itoa(idList[i]))
+	}
+	sb.WriteString(")")
+
+	println(sb.String())
+
+	_, err := m.DB.ExecContext(ctx, sb.String())
 	if err != nil {
 		return err
 	}
