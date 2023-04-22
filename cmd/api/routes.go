@@ -14,18 +14,19 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/places", app.getAllPlaces)
 	router.HandlerFunc(http.MethodPost, "/v1/admin/editPlace", app.editPlace)
 	router.HandlerFunc(http.MethodGet, "/v1/admin/deletePlace/:id", app.deletePlace)
+	router.HandlerFunc(http.MethodPost, "/v1/admin/deletePlaces", app.deletePlaces)
 
 	// Categories
-	router.HandlerFunc(http.MethodGet, "/v1/admin/categories/:id", app.deletePlace)
-	router.HandlerFunc(http.MethodGet, "/v1/admin/categories", app.deletePlace)
-	router.HandlerFunc(http.MethodPost, "/v1/admin/updateCategory", app.deletePlace)
-	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteCategories", app.deletePlace)
+	router.HandlerFunc(http.MethodGet, "/v1/admin/categories/:id", app.getCategoryByID)
+	router.HandlerFunc(http.MethodGet, "/v1/admin/categories", app.getAllCategories)
+	router.HandlerFunc(http.MethodPost, "/v1/admin/editCategory", app.editCategory)
+	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteCategories", app.deleteCategory)
 
 	// Location
-	router.HandlerFunc(http.MethodGet, "/v1/admin/locations/:id", app.deletePlace)
-	router.HandlerFunc(http.MethodGet, "/v1/admin/locations", app.deletePlace)
-	router.HandlerFunc(http.MethodPost, "/v1/admin/updatePlace", app.deletePlace)
-	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteLocation/:id", app.deletePlace)
+	router.HandlerFunc(http.MethodGet, "/v1/admin/locations/:id", app.getLocationByID)
+	router.HandlerFunc(http.MethodGet, "/v1/admin/locations", app.getAllLocations)
+	router.HandlerFunc(http.MethodPost, "/v1/admin/updateLocation", app.editLocation)
+	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteLocation/:id", app.deleteLocation)
 
 	router.HandlerFunc(http.MethodPost, "/v1/auth/login", app.deletePlace)
 	router.HandlerFunc(http.MethodPost, "/v1/auth/logout", app.deletePlace)
