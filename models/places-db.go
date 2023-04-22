@@ -14,7 +14,7 @@ type DBModel struct {
 	DB *sql.DB
 }
 
-func (m *DBModel) Get(id int) (*Place, error) {
+func (m *DBModel) GetPlaceByID(id int) (*Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -70,7 +70,7 @@ func (m *DBModel) Get(id int) (*Place, error) {
 	return &place, nil
 }
 
-func (m *DBModel) All(category ...string) ([]*Place, error) {
+func (m *DBModel) GetAllPlaces(category ...string) ([]*Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 

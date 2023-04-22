@@ -9,7 +9,7 @@ func (app *application) WriteJSON(w http.ResponseWriter, status int, data interf
 	wrapper := make(map[string]interface{})
 	wrapper[wrap] = data
 	js, err := json.Marshal(wrapper)
-
+	
 	if err != nil {
 		return err
 	}
