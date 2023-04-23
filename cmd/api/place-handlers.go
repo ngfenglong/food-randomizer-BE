@@ -97,7 +97,7 @@ func (app *application) deletePlaces(w http.ResponseWriter, r *http.Request) {
 		app.errorJSON(w, err)
 	}
 
-	err = app.WriteJSON(w, http.StatusOK, nil, "response")
+	err = app.WriteJSON(w, http.StatusOK, "Deleted Successfully", "response")
 	if err != nil {
 		app.errorJSON(w, err)
 	}
@@ -150,5 +150,4 @@ func (app *application) editPlace(w http.ResponseWriter, r *http.Request) {
 		app.errorJSON(w, err)
 		return
 	}
-
 }

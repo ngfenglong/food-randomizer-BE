@@ -20,7 +20,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/admin/categories/:id", app.getCategoryByID)
 	router.HandlerFunc(http.MethodGet, "/v1/admin/categories", app.getAllCategories)
 	router.HandlerFunc(http.MethodPost, "/v1/admin/editCategory", app.editCategory)
-	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteCategories", app.deleteCategory)
+	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteCategory/:id", app.deleteCategory)
+	router.HandlerFunc(http.MethodPost, "/v1/admin/deleteCategories", app.deleteCategories)
 
 	// Location
 	router.HandlerFunc(http.MethodGet, "/v1/admin/locations/:id", app.getLocationByID)
