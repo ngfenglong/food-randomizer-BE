@@ -24,10 +24,11 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/admin/deleteCategories", app.deleteCategories)
 
 	// Location
-	router.HandlerFunc(http.MethodGet, "/v1/admin/locations/:id", app.getLocationByID)
 	router.HandlerFunc(http.MethodGet, "/v1/admin/locations", app.getAllLocations)
+	router.HandlerFunc(http.MethodGet, "/v1/admin/locations/:id", app.getLocationByID)
 	router.HandlerFunc(http.MethodPost, "/v1/admin/updateLocation", app.editLocation)
 	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteLocation/:id", app.deleteLocation)
+	router.HandlerFunc(http.MethodPost, "/v1/admin/deleteLocations", app.deleteLocations)
 
 	router.HandlerFunc(http.MethodPost, "/v1/auth/login", app.deletePlace)
 	router.HandlerFunc(http.MethodPost, "/v1/auth/logout", app.deletePlace)

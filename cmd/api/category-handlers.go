@@ -99,16 +99,19 @@ func (app *application) deleteCategory(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
 		app.errorJSON(w, err)
+		return
 	}
 
 	err = app.models.DB.DeleteCategory(id)
 	if err != nil {
 		app.errorJSON(w, err)
+		return
 	}
 
 	err = app.WriteJSON(w, http.StatusOK, "Deleted Successfully", "response")
 	if err != nil {
 		app.errorJSON(w, err)
+		return
 	}
 }
 
@@ -118,19 +121,23 @@ func (app *application) deleteCategories(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&idList)
 	if err != nil {
 		app.errorJSON(w, err)
+		return
 	}
 
 	if len(idList) == 0 {
 		app.errorJSON(w, errors.New("the ID list is empty"))
+		return
 	}
 
 	err = app.models.DB.DeleteCategories(idList)
 	if err != nil {
 		app.errorJSON(w, err)
+		return
 	}
 
 	err = app.WriteJSON(w, http.StatusOK, "Deleted Successfully", "response")
 	if err != nil {
 		app.errorJSON(w, err)
+		return
 	}
 }

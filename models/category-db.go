@@ -85,7 +85,7 @@ func (m *DBModel) UpdateCategory(category Category) error {
 		Update category set category_name = ? where id = ?
 	`
 
-	_, err := m.DB.ExecContext(ctx, stmt, category.ID, category.CategoryName)
+	_, err := m.DB.ExecContext(ctx, stmt, category.CategoryName, category.ID)
 	if err != nil {
 		return err
 	}
