@@ -226,8 +226,6 @@ func (m *DBModel) DeletePlaces(idList []int) error {
 	}
 	sb.WriteString(")")
 
-	println(sb.String())
-
 	_, err := m.DB.ExecContext(ctx, sb.String())
 	if err != nil {
 		return err

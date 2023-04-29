@@ -48,7 +48,7 @@ type PlaceCategory struct {
 }
 
 type Location struct {
-	ID           int       `json:"-"`
+	ID           int       `json:"id"`
 	LocationName string    `json:"location_name"`
 	StreetName   string    `json:"street_name"`
 	Lat          string    `json:"lat"`
