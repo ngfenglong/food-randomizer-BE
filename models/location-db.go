@@ -57,7 +57,6 @@ func (m *DBModel) GetAllLocations() ([]*Location, error) {
 		}
 		locations = append(locations, &location)
 	}
-
 	return locations, nil
 }
 
