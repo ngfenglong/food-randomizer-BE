@@ -6,7 +6,7 @@ import (
 )
 
 type LoginDto struct {
-	Email    string `json:"email"` 
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -33,7 +33,7 @@ func (m *DBModel) GetUserByEmail(email string) (*User, error) {
 		Select id, username, email, password, role 
 		From user 
 		Where email = ?
-	`)
+	`, email)
 
 	err := row.Scan(
 		&u.ID,
