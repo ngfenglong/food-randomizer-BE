@@ -19,13 +19,13 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 
 	user, err := app.models.DB.GetUserByEmail(loginCredential.Email)
 	if err != nil {
-		app.errorJSON(w, errors.New("invalid login crendential"))
+		app.errorJSON(w, errors.New("invalid login crendential"), http.StatusUnauthorized)
 		return
 	}
 
 	validPassword, err := app.PasswordMatches(user.Password, loginCredential.Password)
 	if !validPassword || err != nil {
-		app.errorJSON(w, errors.New("invalid login crendential"))
+		app.errorJSON(w, errors.New("invalid login crendential"), http.StatusUnauthorized)
 		return
 	}
 
@@ -36,19 +36,19 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	}
 	accessToken, accessExpiry, err := app.GenerateAccessToken(tokenDetail)
 	if err != nil {
-		app.errorJSON(w, err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
 	refreshToken, refreshExpiry, err := app.GenerateRefreshToken(tokenDetail)
 	if err != nil {
-		app.errorJSON(w, err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
 	err = app.models.DB.InsertToken(user.ID, refreshToken, refreshExpiry)
 	if err != nil {
-		app.errorJSON(w, err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -60,7 +60,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 
 	err = app.WriteJSON(w, http.StatusOK, payload, "data")
 	if err != nil {
-		app.errorJSON(w, err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
