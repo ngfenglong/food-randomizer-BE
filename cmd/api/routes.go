@@ -30,9 +30,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/admin/deleteLocation/:id", app.deleteLocation)
 	router.HandlerFunc(http.MethodPost, "/v1/admin/deleteLocations", app.deleteLocations)
 
-	router.HandlerFunc(http.MethodPost, "/v1/auth/login", app.deletePlace)
-	router.HandlerFunc(http.MethodPost, "/v1/auth/logout", app.deletePlace)
-	router.HandlerFunc(http.MethodPost, "/v1/auth/forget-password", app.deletePlace)
+	router.HandlerFunc(http.MethodPost, "/v1/auth/login", app.login)
+	router.HandlerFunc(http.MethodPost, "/v1/auth/logout", app.logout)
+	router.HandlerFunc(http.MethodPost, "/v1/auth/register", app.register)
+	router.HandlerFunc(http.MethodPost, "/v1/auth/forget-password", app.forgetPassword)
 
 	return app.enableCORS(router)
 }

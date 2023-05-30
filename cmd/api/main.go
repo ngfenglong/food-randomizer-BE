@@ -13,14 +13,16 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/spf13/viper"
 )
 
 const version = "1.0.0"
 
 type config struct {
-	port int
-	env  string
-	db   struct {
+	port       int
+	env        string
+	secretCode string
+	db         struct {
 		dsn string
 	}
 	jwt struct {
@@ -42,8 +44,14 @@ type application struct {
 
 func main() {
 	var cfg config
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
-	portStr := os.Getenv("PORT")
+	err := LoadConfig()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	portStr := viper.GetString("PORT")
 	defaultPort, err := strconv.Atoi(portStr)
 	if err != nil {
 		// Set a default port value if the environment variable is not set or cannot be converted to an integer.
@@ -51,13 +59,11 @@ func main() {
 	}
 
 	flag.IntVar(&cfg.port, "port", defaultPort, "Server port to listen on")
-	flag.StringVar(&cfg.db.dsn, "dsn", os.Getenv("DB_CONNECTIONSTRING"), "Postgres connection string")
-	// flag.StringVar(&cfg.db.dsn, "dsn", "root:password@tcp(localhost:3306)/time-to-makan?parseTime=true&tls=false", "mySQL connection string")
+	flag.StringVar(&cfg.db.dsn, "dsn", viper.GetString("DB_CONNECTIONSTRING"), "mySQL connection string")
+	flag.StringVar(&cfg.secretCode, "secretCode", viper.GetString("SECRET_CODE"), "registration secret code")
 	flag.StringVar(&cfg.env, "env", "development", "Application environment (development|production)")
 	flag.StringVar(&cfg.jwt.secret, "jwt-secret", "2dce505d96a53c5768052ee90f3df2055657518dad489160df9913f66042e160", "secret")
 	flag.Parse()
-
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	db, err := openDB(cfg)
 	if err != nil {
@@ -104,4 +110,20 @@ func openDB(cfg config) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func LoadConfig() error {
+	viper.AddConfigPath(".")
+
+	viper.SetConfigName("prod")
+
+	viper.SetConfigType("env")
+
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		return err
+	}
+
+	return nil
 }

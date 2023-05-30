@@ -67,8 +67,18 @@ type PlaceLocation struct {
 }
 
 type User struct {
-	ID       int
-	UserName string
-	Email    string
-	Password string
+	ID        int       `json:"id"`
+	UserName  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"-"`
+	Role      int       `json:"role"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
+}
+
+type Token struct {
+	ID     int
+	UserID int
+	Token  string
+	Expiry time.Time
 }

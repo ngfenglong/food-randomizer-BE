@@ -1,59 +1,50 @@
 package main
 
 import (
-	"backend/models"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
 	"time"
 
-	"github.com/pascaldekloe/jwt"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/spf13/viper"
 )
 
-var validUser = models.User{
-	ID:       10,
-	UserName: "admin",
-	Password: "$2a$12$NK91q9rL41LBR1HbVksu0ufV.x4GjjJW0HNyuB/laumKuYY.55ATW",
+var accessTokenSecret = viper.GetString("JTW_ACCESS_SECRET")
+var refreshTokenSecret = viper.GetString("JTW_REFRESH_SECRET")
+
+type TokenDetail struct {
+	ID       int
+	Email    string
+	Username string
 }
 
-type Credentials struct {
-	Username string `json:"email"`
-	Password string `json:"password"`
+func (app *application) GenerateAccessToken(td *TokenDetail) (string, time.Time, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	expiry := time.Now().Add(time.Hour * 24 * 3)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["ID"] = td.ID
+	claims["Email"] = td.Email
+	claims["Username"] = td.Username
+	claims["exp"] = expiry
+
+	signedToken, err := token.SignedString([]byte(accessTokenSecret))
+	if err != nil {
+		return "", expiry, err
+	}
+
+	return signedToken, expiry, nil
 }
 
-func (app *application) Signin(w http.ResponseWriter, r *http.Request) {
-	var creds Credentials
+func (app *application) GenerateRefreshToken(td *TokenDetail) (string, time.Time, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	expiry := time.Now().Add(time.Hour * 24 * 7)
 
-	err := json.NewDecoder(r.Body).Decode(&creds)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["ID"] = td.ID
+	claims["exp"] = expiry
+
+	signedToken, err := token.SignedString([]byte(refreshTokenSecret))
 	if err != nil {
-		app.errorJSON(w, errors.New("unauthorized"))
-		return
+		return "", expiry, err
 	}
 
-	hashedPassword := validUser.Password
-
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(creds.Password))
-	if err != nil {
-		app.errorJSON(w, errors.New("unauthorized"))
-		return
-	}
-
-	var claims jwt.Claims
-	claims.Subject = fmt.Sprint(validUser.ID)
-	claims.Issued = jwt.NewNumericTime(time.Now())
-	claims.NotBefore = jwt.NewNumericTime(time.Now())
-	claims.Expires = jwt.NewNumericTime(time.Now().Add(24 * time.Hour))
-	claims.Issuer = "mydomain.com"
-	claims.Audiences = []string{"mydomain.com"}
-
-	jwtBytes, err := claims.HMACSign(jwt.HS256, []byte(app.config.jwt.secret))
-	if err != nil {
-		app.errorJSON(w, errors.New("error signing"))
-		return
-	}
-
-	app.WriteJSON(w, http.StatusOK, string(jwtBytes), "response")
-
+	return signedToken, expiry, nil
 }
