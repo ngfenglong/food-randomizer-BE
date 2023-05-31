@@ -102,6 +102,7 @@ func (app *application) forgetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) register(w http.ResponseWriter, r *http.Request) {
+	fmt.Print("err 0", r.Body)
 	var registerInput models.RegisterUserDto
 	err := json.NewDecoder(r.Body).Decode(&registerInput)
 	if err != nil {
