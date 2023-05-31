@@ -4,6 +4,7 @@ import (
 	"backend/models"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -104,17 +105,20 @@ func (app *application) register(w http.ResponseWriter, r *http.Request) {
 	var registerInput models.RegisterUserDto
 	err := json.NewDecoder(r.Body).Decode(&registerInput)
 	if err != nil {
+		fmt.Print("err 1", err)
 		app.errorJSON(w, err)
 		return
 	}
 
 	if registerInput.SecretCode != app.config.secretCode {
+		fmt.Print("err 2", err)
 		app.errorJSON(w, errors.New("insert a valid secret code"))
 		return
 	}
 
 	usernameExists, emailExists, err := app.models.DB.CheckIfUserExists(registerInput)
 	if err != nil {
+		fmt.Print("err 3", err)
 		app.errorJSON(w, err)
 		return
 	}
