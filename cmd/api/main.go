@@ -115,7 +115,7 @@ func openDB(cfg config) (*sql.DB, error) {
 func LoadConfig() error {
 	viper.AddConfigPath(".")
 
-	viper.SetConfigName("prod")
+	viper.SetConfigName("app")
 
 	viper.SetConfigType("env")
 
