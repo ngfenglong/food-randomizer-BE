@@ -4,6 +4,7 @@ import (
 	"backend/models"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -24,6 +25,7 @@ type PlaceDto struct {
 }
 
 func (app *application) getAllPlaces(w http.ResponseWriter, r *http.Request) {
+	fmt.Print("TYesting")
 	places, err := app.models.DB.GetAllPlaces()
 
 	if err != nil {
