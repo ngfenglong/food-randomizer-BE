@@ -125,18 +125,18 @@ func (app *application) register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if usernameExists {
-		app.errorJSON(w, errors.New("usename already exists"))
+		app.errorJSON(w, errors.New("usename already exists"), http.StatusConflict)
 		return
 	}
 
 	if emailExists {
-		app.errorJSON(w, errors.New("email already exists"))
+		app.errorJSON(w, errors.New("email already exists"), http.StatusConflict)
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerInput.Password), 10)
 	if err != nil {
-		app.errorJSON(w, err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -144,7 +144,7 @@ func (app *application) register(w http.ResponseWriter, r *http.Request) {
 
 	err = app.models.DB.RegisterUser(registerInput)
 	if err != nil {
-		app.errorJSON(w, err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
 
