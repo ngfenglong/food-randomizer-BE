@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/admin/updatePlace", app.editPlace)
 	router.HandlerFunc(http.MethodGet, "/v1/admin/deletePlace/:id", app.deletePlace)
 	router.HandlerFunc(http.MethodPost, "/v1/admin/deletePlaces", app.deletePlaces)
+	router.HandlerFunc(http.MethodGet, "/v1/generatePlace", app.generatePlace)
 
 	// Categories
 	router.HandlerFunc(http.MethodGet, "/v1/admin/categories", app.getAllCategories)
