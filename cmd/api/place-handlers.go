@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -21,6 +22,20 @@ type PlaceDto struct {
 	IsHalal      bool   `json:"is_halal"`
 	IsVegetarian bool   `json:"is_vegetarian"`
 	Location     string `json:"location"`
+}
+
+func (app *application) generatePlace(w http.ResponseWriter, r *http.Request) {
+	places, err := app.models.DB.GetAllPlaces()
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	idx := rand.Intn(len(places))
+	err = app.WriteJSON(w, http.StatusOK, places[idx], "place")
+	if err != nil {
+		app.errorJSON(w, err)
+	}
 }
 
 func (app *application) getAllPlaces(w http.ResponseWriter, r *http.Request) {
