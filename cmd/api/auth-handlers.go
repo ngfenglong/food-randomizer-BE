@@ -1,5 +1,5 @@
 package main
-// Test Commit
+
 import (
 	"backend/models"
 	"encoding/json"
@@ -159,4 +159,43 @@ func (app *application) register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.errorJSON(w, err)
 	}
+}
+
+func (app *application) request_access(w http.ResponseWriter, r *http.Request) {
+	var adminRequest models.AdminRequestDto
+	err := json.NewDecoder(r.Body).Decode(&adminRequest)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	isRequestPending, err := app.models.DB.IsAdminRequestPending(adminRequest)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	if isRequestPending {
+		app.errorJSON(w, errors.New("An admin access request for this Telegram ID has already been submitted and is pending review."))
+		return
+	}
+
+	err = app.models.DB.RegisterRequest(adminRequest.TelegramID, adminRequest.TelegramUsername)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	payload.Error = false
+	payload.Message = "Request submitted successfully"
+
+	err = app.WriteJSON(w, http.StatusOK, payload, "data")
+	if err != nil {
+		app.errorJSON(w, err)
+	}
+
 }
