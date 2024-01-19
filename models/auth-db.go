@@ -24,6 +24,11 @@ type LoginResponseDto struct {
 	UserName     string    `json:"username"`
 }
 
+type AdminRequestDto struct {
+	TelegramID       string `json:"telegram_id"`
+	TelegramUsername string `json:"telegram_username"`
+}
+
 func (m *DBModel) GetUserByEmail(email string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -115,6 +120,37 @@ func (m *DBModel) DeleteToken(refreshToken string) error {
 
 	stmt := `Delete from refresh_token where token = ?`
 	_, err := m.DB.ExecContext(ctx, stmt, refreshToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DBModel) IsAdminRequestPending(ar AdminRequestDto) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int
+	checkRequestStmt := `SELECT count(*) FROM admin_request WHERE telegram_id = ?`
+	row := m.DB.QueryRowContext(ctx, checkRequestStmt, ar.TelegramID)
+	err := row.Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return true, err
+	}
+
+	return false, nil
+}
+
+func (m *DBModel) RegisterRequest(teleId, teleUsername string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `INSERT INTO admin_request(telegram_id, telegram_username) VALUE (?,?)`
+	_, err := m.DB.ExecContext(ctx, stmt, teleId, teleUsername)
 	if err != nil {
 		return err
 	}

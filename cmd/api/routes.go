@@ -36,5 +36,8 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/auth/register", app.register)
 	router.HandlerFunc(http.MethodPost, "/v1/auth/forget-password", app.forgetPassword)
 
+	// Telegram_Access
+	router.HandlerFunc(http.MethodPost, "/v1/auth/requestAccess", app.request_access)
+
 	return app.enableCORS(router)
 }
