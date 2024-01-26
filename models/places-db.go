@@ -107,33 +107,57 @@ func (m *DBModel) GetAllPlaces(category ...string) ([]*Place, error) {
 		if err != nil {
 			return nil, err
 		}
-		// 	categoryQuery := `Select
-		// 				pc.id, pc.place_id, pc.category_id, c.category_name
-		// 			From
-		// 				place_category pc
-		// 				left join category c on (c.id = pc.category_id)
-		// 			Where
-		// 				pc.place_id = ?
-		// 			`
 
-		// 	categoryRows, _ := m.DB.QueryContext(ctx, categoryQuery, place.ID)
+		places = append(places, &place)
+	}
+	return places, nil
+}
 
-		// 	category := make(map[int]string)
-		// 	for categoryRows.Next() {
-		// 		var pc PlaceCategory
-		// 		err := categoryRows.Scan(
-		// 			&pc.ID,
-		// 			&pc.MovieID,
-		// 			&pc.CategoryID,
-		// 			&pc.Category.CategoryName,
-		// 		)
-		// 		if err != nil {
-		// 			return nil, err
-		// 		}
-		// 		category[pc.ID] = pc.Category.CategoryName
-		// 	}
-		// 	categoryRows.Close()
-		// 	place.Category = category
+func (m *DBModel) GetAllPlacesWithFilter(isHalal, isVegetarian bool) ([]*Place, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	where := ""
+	if isHalal {
+		where = fmt.Sprintf("where is_halal = 1")
+	}
+
+	if isVegetarian {
+		if len(where) > 0 {
+			where += fmt.Sprintf(" and is_vegetarian = 1")
+		} else {
+			where = fmt.Sprintf("where is_vegetarian = 1")
+		}
+	}
+
+	query := fmt.Sprintf(`select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place %s order by name`, where)
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var places []*Place
+	for rows.Next() {
+		var place Place
+		err := rows.Scan(
+			&place.ID,
+			&place.Name,
+			&place.Description,
+			&place.IsHalal,
+			&place.IsVegetarian,
+			&place.Location,
+			&place.Lat,
+			&place.Lon,
+			&place.CreatedAt,
+			&place.UpdatedAt,
+			&place.Category,
+		)
+		if err != nil {
+			return nil, err
+		}
+
 		places = append(places, &place)
 	}
 	return places, nil
