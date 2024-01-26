@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/models"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,7 +27,36 @@ type PlaceDto struct {
 }
 
 func (app *application) generatePlace(w http.ResponseWriter, r *http.Request) {
-	places, err := app.models.DB.GetAllPlaces()
+	queryParams := r.URL.Query()
+	isHalalParam, isHalalExists := queryParams["is_halal"]
+	isVegetarianParam, isVegetarianExists := queryParams["is_vegetarian"]
+
+	var isHalal, isVegetarian bool
+	var err error
+
+	if isHalalExists && len(isHalalParam) > 0 {
+		isHalal, err = strconv.ParseBool(isHalalParam[0])
+		if err != nil {
+			app.errorJSON(w, err)
+			return
+		}
+	}
+
+	if isVegetarianExists && len(isVegetarianParam) > 0 {
+		isVegetarian, err = strconv.ParseBool(isVegetarianParam[0])
+		if err != nil {
+			app.errorJSON(w, err)
+			return
+		}
+	}
+
+	var places []*models.Place
+	if isHalalExists || isVegetarianExists {
+		places, err = app.models.DB.GetAllPlacesWithFilter(isHalal, isVegetarian)
+	} else {
+		places, err = app.models.DB.GetAllPlaces()
+	}
+
 	if err != nil {
 		app.errorJSON(w, err)
 		return
@@ -94,6 +124,7 @@ func (app *application) deletePlace(w http.ResponseWriter, r *http.Request) {
 	err = app.WriteJSON(w, http.StatusOK, nil, "response")
 	if err != nil {
 		app.errorJSON(w, err)
+		return
 	}
 }
 
@@ -127,13 +158,24 @@ func (app *application) editPlace(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("error", err)
 		app.errorJSON(w, err)
+		return
 	}
 
 	var place models.Place
 
 	if payload.ID != 0 {
-		m, _ := app.models.DB.GetPlaceByID(payload.ID)
-		place = *m
+		m, err := app.models.DB.GetPlaceByID(payload.ID)
+
+		if err != nil {
+			if err == sql.ErrNoRows {
+				payload.ID = 0
+			} else {
+				app.errorJSON(w, err)
+				return
+			}
+		} else {
+			place = *m
+		}
 	}
 
 	place.ID = payload.ID
