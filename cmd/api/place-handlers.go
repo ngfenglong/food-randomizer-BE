@@ -115,6 +115,17 @@ func (app *application) deletePlace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if ID exists
+	place, err := app.models.DB.GetPlaceByID(id)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	if place == nil {
+		app.errorJSON(w, errors.New("ID does not exists"))
+	}
+
 	err = app.models.DB.DeletePlace(id)
 	if err != nil {
 		app.errorJSON(w, err)
