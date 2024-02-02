@@ -39,34 +39,6 @@ func (m *DBModel) GetPlaceByID(id int) (*Place, error) {
 		return nil, err
 	}
 
-	// query = `Select
-	// 			pc.id, pc.place_id, pc.category_id, c.category_name
-	// 		From
-	// 			place_category pc
-	// 			left join category c on (c.id = pc.category_id)
-	// 		Where
-	// 			pc.place_id =?
-	// 		`
-	// rows, _ := m.DB.QueryContext(ctx, query, id)
-
-	// defer rows.Close()
-
-	// category := make(map[int]string)
-	// for rows.Next() {
-	// 	var pc PlaceCategory
-	// 	err := rows.Scan(
-	// 		&pc.ID,
-	// 		&pc.MovieID,
-	// 		&pc.CategoryID,
-	// 		&pc.Category,
-	// 	)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	category[pc.ID] = pc.Category.CategoryName
-	// }
-
-	// place.Category = category
 	return &place, nil
 }
 
