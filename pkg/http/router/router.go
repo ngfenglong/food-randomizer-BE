@@ -25,26 +25,26 @@ func NewRouter(cfg *config.Config, db *sql.DB) *mux.Router {
 	api := r.PathPrefix("/v1").Subrouter()
 	// api.HandleFunc("/places", auth.PlaceHandler(db)).Methods("GET")
 
-	// Places
+	// Placesx
 	api.HandleFunc("/laces", place.GetAllPlaces(placeRepo)).Methods("GET")
 	api.HandleFunc("/places/:id", place.GetPlaceByID(placeRepo)).Methods("GET")
-	api.HandleFunc("/admin/updatePlace", place.EditPlace(placeRepo)).Methods("POST")
-	api.HandleFunc("/admin/deletePlace/:id", place.DeletePlace(placeRepo)).Methods("GET")
+	api.HandleFunc("/admin/updatePlace", place.EditPlace(placeRepo)).Methods("PUT")
+	api.HandleFunc("/admin/deletePlace/:id", place.DeletePlace(placeRepo)).Methods("DELETE")
 	api.HandleFunc("/admin/deletePlaces", place.DeletePlaces(placeRepo)).Methods("POST")
 	api.HandleFunc("/generatePlace", place.GeneratePlace(placeRepo)).Methods("GET")
 
 	// Categories
-	api.HandleFunc("/admin/categrioes", category.GetAllCategories(categoryRepo)).Methods("GET")
+	api.HandleFunc("/admin/categories", category.GetAllCategories(categoryRepo)).Methods("GET")
 	api.HandleFunc("/admin/categories/:id", category.GetCategoryByID(categoryRepo)).Methods("GET")
-	api.HandleFunc("/admin/updateCategory", category.EditCategory(categoryRepo)).Methods("POST")
-	api.HandleFunc("/v1/admin/deleteCategory/:id", category.DeleteCategory(categoryRepo)).Methods("GET")
+	api.HandleFunc("/admin/updateCategory", category.EditCategory(categoryRepo)).Methods("PUT")
+	api.HandleFunc("/v1/admin/deleteCategory/:id", category.DeleteCategory(categoryRepo)).Methods("DELETE")
 	api.HandleFunc("/v1/admin/deleteCategories", category.DeleteCategories(categoryRepo)).Methods("POST")
 
 	// Location
 	api.HandleFunc("/v1/admin/locations", location.GetAllLocations(locationRepo)).Methods("GET")
 	api.HandleFunc("/v1/admin/locations/:id", location.GetLocationByID(locationRepo)).Methods("GET")
-	api.HandleFunc("/v1/admin/updateLocation", location.EditLocation(locationRepo)).Methods("POST")
-	api.HandleFunc("/v1/admin/deleteLocation/:id", location.DeleteLocation(locationRepo)).Methods("GET")
+	api.HandleFunc("/v1/admin/updateLocation", location.EditLocation(locationRepo)).Methods("PUT")
+	api.HandleFunc("/v1/admin/deleteLocation/:id", location.DeleteLocation(locationRepo)).Methods("DELETE")
 	api.HandleFunc("/v1/admin/deleteLocations", location.DeleteLocations(locationRepo)).Methods("POST")
 
 	api.HandleFunc("/v1/auth/login", auth.Login(authRepo)).Methods("POST")
