@@ -26,7 +26,7 @@ func NewRouter(cfg *config.Config, db *sql.DB) *mux.Router {
 	// api.HandleFunc("/places", auth.PlaceHandler(db)).Methods("GET")
 
 	// Placesx
-	api.HandleFunc("/laces", place.GetAllPlaces(placeRepo)).Methods("GET")
+	api.HandleFunc("/places", place.GetAllPlaces(placeRepo)).Methods("GET")
 	api.HandleFunc("/places/:id", place.GetPlaceByID(placeRepo)).Methods("GET")
 	api.HandleFunc("/admin/updatePlace", place.EditPlace(placeRepo)).Methods("PUT")
 	api.HandleFunc("/admin/deletePlace/:id", place.DeletePlace(placeRepo)).Methods("DELETE")
