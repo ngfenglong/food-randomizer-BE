@@ -1,4 +1,4 @@
-package models
+package place
 
 import (
 	"context"
@@ -7,21 +7,36 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
+
+	"github.com/ngfenglong/food-randomizer-BE/pkg/models"
 )
 
-type DBModel struct {
-	DB *sql.DB
+var _ PlaceRepository = &SQLPlaceRepository{}
+
+type PlaceRepository interface {
+	// Add more methods as needed
+	GetPlaceByID(ctx context.Context, id int) (*models.Place, error)
+	GetAllPlaces(ctx context.Context, category ...string) ([]*models.Place, error)
+	GetAllPlacesWithFilter(ctx context.Context, isHalal, isVegetarian bool) ([]*models.Place, error)
+	InsertPlace(ctx context.Context, place models.Place) error
+	UpdatePlace(ctx context.Context, place models.Place) error
+	DeletePlace(ctx context.Context, id int) error
+	DeletePlaces(ctx context.Context, idList []int) error
 }
 
-func (m *DBModel) GetPlaceByID(id int) (*Place, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
+type SQLPlaceRepository struct {
+	db *sql.DB
+}
 
+func NewSQLPlaceRepository(db *sql.DB) *SQLPlaceRepository {
+	return &SQLPlaceRepository{db: db}
+}
+
+func (r *SQLPlaceRepository) GetPlaceByID(ctx context.Context, id int) (*models.Place, error) {
 	query := `select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place where id = ?`
 
-	row := m.DB.QueryRowContext(ctx, query, id)
-	var place Place
+	row := r.db.QueryRowContext(ctx, query, id)
+	var place models.Place
 	err := row.Scan(
 		&place.ID,
 		&place.Name,
@@ -42,10 +57,7 @@ func (m *DBModel) GetPlaceByID(id int) (*Place, error) {
 	return &place, nil
 }
 
-func (m *DBModel) GetAllPlaces(category ...string) ([]*Place, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
+func (r *SQLPlaceRepository) GetAllPlaces(ctx context.Context, category ...string) ([]*models.Place, error) {
 	where := ""
 	if len(category) > 0 {
 		println(category)
@@ -53,16 +65,16 @@ func (m *DBModel) GetAllPlaces(category ...string) ([]*Place, error) {
 	}
 
 	query := fmt.Sprintf(`select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place %s order by name`, where)
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	var places []*Place
+	var places []*models.Place
 	for rows.Next() {
-		var place Place
+		var place models.Place
 		err := rows.Scan(
 			&place.ID,
 			&place.Name,
@@ -85,10 +97,7 @@ func (m *DBModel) GetAllPlaces(category ...string) ([]*Place, error) {
 	return places, nil
 }
 
-func (m *DBModel) GetAllPlacesWithFilter(isHalal, isVegetarian bool) ([]*Place, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
+func (r *SQLPlaceRepository) GetAllPlacesWithFilter(ctx context.Context, isHalal, isVegetarian bool) ([]*models.Place, error) {
 	where := ""
 	if isHalal {
 		where = fmt.Sprintf("where is_halal = 1")
@@ -103,16 +112,16 @@ func (m *DBModel) GetAllPlacesWithFilter(isHalal, isVegetarian bool) ([]*Place, 
 	}
 
 	query := fmt.Sprintf(`select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place %s order by name`, where)
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	var places []*Place
+	var places []*models.Place
 	for rows.Next() {
-		var place Place
+		var place models.Place
 		err := rows.Scan(
 			&place.ID,
 			&place.Name,
@@ -135,17 +144,14 @@ func (m *DBModel) GetAllPlacesWithFilter(isHalal, isVegetarian bool) ([]*Place, 
 	return places, nil
 }
 
-func (m *DBModel) InsertPlace(place Place) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
+func (r *SQLPlaceRepository) InsertPlace(ctx context.Context, place models.Place) error {
 	stmt := `
 		insert into place 
 		(name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category) 
 		values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	_, err := m.DB.ExecContext(ctx, stmt,
+	_, err := r.db.ExecContext(ctx, stmt,
 		place.Name,
 		place.Description,
 		place.IsHalal,
@@ -164,13 +170,10 @@ func (m *DBModel) InsertPlace(place Place) error {
 	return nil
 }
 
-func (m *DBModel) UpdatePlace(place Place) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
+func (r *SQLPlaceRepository) UpdatePlace(ctx context.Context, place models.Place) error {
 	stmt := `Update place set name = ?, description = ?, is_halal = ?, is_vegetarian = ?, location = ?, lat = ?, lon = ?, created_at = ? , updated_at = ? , category = ? where id = ?`
 
-	_, err := m.DB.ExecContext(ctx, stmt,
+	_, err := r.db.ExecContext(ctx, stmt,
 		place.Name,
 		place.Description,
 		place.IsHalal,
@@ -191,13 +194,10 @@ func (m *DBModel) UpdatePlace(place Place) error {
 	return nil
 }
 
-func (m *DBModel) DeletePlace(id int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
+func (r *SQLPlaceRepository) DeletePlace(ctx context.Context, id int) error {
 	stmt := "Delete from place where id = ?"
 
-	_, err := m.DB.ExecContext(ctx, stmt, id)
+	_, err := r.db.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
 	}
@@ -205,10 +205,7 @@ func (m *DBModel) DeletePlace(id int) error {
 	return nil
 }
 
-func (m *DBModel) DeletePlaces(idList []int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
+func (r *SQLPlaceRepository) DeletePlaces(ctx context.Context, idList []int) error {
 	if len(idList) == 0 {
 		return errors.New("The list is empty")
 	}
@@ -222,7 +219,7 @@ func (m *DBModel) DeletePlaces(idList []int) error {
 	}
 	sb.WriteString(")")
 
-	_, err := m.DB.ExecContext(ctx, sb.String())
+	_, err := r.db.ExecContext(ctx, sb.String())
 	if err != nil {
 		return err
 	}

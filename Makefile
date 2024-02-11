@@ -1,6 +1,6 @@
 build:
 	@echo Building...
-	@go build -o dist/api ./cmd/api
+	@go build -o dist/api ./cmd
 	@echo Backend built!
 
 start: build

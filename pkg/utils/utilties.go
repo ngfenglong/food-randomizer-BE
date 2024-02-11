@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (app *application) WriteJSON(w http.ResponseWriter, status int, data interface{}, wrap string) error {
+func WriteJSON(w http.ResponseWriter, status int, data interface{}, wrap string) error {
 	wrapper := make(map[string]interface{})
 	wrapper[wrap] = data
 	js, err := json.Marshal(wrapper)
@@ -24,7 +24,7 @@ func (app *application) WriteJSON(w http.ResponseWriter, status int, data interf
 	return nil
 }
 
-func (app *application) errorJSON(w http.ResponseWriter, err error, status ...int) {
+func ErrorJSON(w http.ResponseWriter, err error, status ...int) {
 	statusCode := http.StatusBadGateway
 
 	if len(status) > 0 {
@@ -39,10 +39,10 @@ func (app *application) errorJSON(w http.ResponseWriter, err error, status ...in
 		Message: err.Error(),
 	}
 
-	app.WriteJSON(w, statusCode, theError, "error")
+	WriteJSON(w, statusCode, theError, "error")
 }
 
-func (app *application) PasswordMatches(hash, password string) (bool, error) {
+func PasswordMatches(hash, password string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err != nil {
 		switch {

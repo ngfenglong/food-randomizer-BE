@@ -8,10 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ngfenglong/food-randomizer-BE/pkg/config"
+	"github.com/ngfenglong/food-randomizer-BE/pkg/utils"
 	"github.com/pascaldekloe/jwt"
 )
 
-func (app *application) enableCORS(next http.Handler) http.Handler {
+func EnableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
@@ -19,7 +21,7 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 	})
 }
 
-func (app *application) checkToken(next http.Handler) http.Handler {
+func CheckToken(next http.Handler, cfg *config.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Vary", "Authorization")
 		authHeader := r.Header.Get("Authorization")
@@ -30,40 +32,40 @@ func (app *application) checkToken(next http.Handler) http.Handler {
 
 		headerParts := strings.Split(authHeader, " ")
 		if len(headerParts) != 2 {
-			app.errorJSON(w, errors.New("invalid auth header"))
+			utils.ErrorJSON(w, errors.New("invalid auth header"))
 			return
 		}
 
 		if headerParts[0] != "Bearer" {
-			app.errorJSON(w, errors.New("unauthorize - no bearer"))
+			utils.ErrorJSON(w, errors.New("unauthorize - no bearer"))
 			return
 		}
 
 		token := headerParts[1]
 
-		claims, err := jwt.HMACCheck([]byte(token), []byte(app.config.jwt.secret))
+		claims, err := jwt.HMACCheck([]byte(token), []byte(cfg.JWT.Secret))
 		if err != nil {
-			app.errorJSON(w, errors.New("unauthorized - failed hmac check"), http.StatusForbidden)
+			utils.ErrorJSON(w, errors.New("unauthorized - failed hmac check"), http.StatusForbidden)
 			return
 		}
 
 		if !claims.Valid(time.Now()) {
-			app.errorJSON(w, errors.New("unauthorized - token expired"), http.StatusForbidden)
+			utils.ErrorJSON(w, errors.New("unauthorized - token expired"), http.StatusForbidden)
 			return
 		}
 
 		if !claims.AcceptAudience("mydomain.com") {
-			app.errorJSON(w, errors.New("unauthorized - invalid audience"), http.StatusForbidden)
+			utils.ErrorJSON(w, errors.New("unauthorized - invalid audience"), http.StatusForbidden)
 			return
 		}
 
 		if claims.Issuer != "mydomain.com" {
-			app.errorJSON(w, errors.New("unauthorized - invalid issuer"), http.StatusForbidden)
+			utils.ErrorJSON(w, errors.New("unauthorized - invalid issuer"), http.StatusForbidden)
 		}
 
 		userID, err := strconv.ParseInt(claims.Subject, 10, 64)
 		if err != nil {
-			app.errorJSON(w, errors.New("unauthorized"), http.StatusForbidden)
+			utils.ErrorJSON(w, errors.New("unauthorized"), http.StatusForbidden)
 		}
 
 		log.Println("Valid user", userID)

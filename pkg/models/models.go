@@ -1,21 +1,8 @@
 package models
 
 import (
-	"database/sql"
 	"time"
 )
-
-type Models struct {
-	DB DBModel
-}
-
-func NewModels(db *sql.DB) Models {
-	return Models{
-		DB: DBModel{
-			DB: db,
-		},
-	}
-}
 
 type Place struct {
 	ID           int       `json:"id"`

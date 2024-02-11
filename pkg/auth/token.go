@@ -1,4 +1,4 @@
-package main
+package auth
 
 import (
 	"time"
@@ -16,7 +16,7 @@ type TokenDetail struct {
 	Username string
 }
 
-func (app *application) GenerateAccessToken(td *TokenDetail) (string, time.Time, error) {
+func GenerateAccessToken(td *TokenDetail) (string, time.Time, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	expiry := time.Now().Add(time.Hour * 24 * 3)
 	claims := token.Claims.(jwt.MapClaims)
@@ -33,7 +33,7 @@ func (app *application) GenerateAccessToken(td *TokenDetail) (string, time.Time,
 	return signedToken, expiry, nil
 }
 
-func (app *application) GenerateRefreshToken(td *TokenDetail) (string, time.Time, error) {
+func GenerateRefreshToken(td *TokenDetail) (string, time.Time, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	expiry := time.Now().Add(time.Hour * 24 * 7)
 
