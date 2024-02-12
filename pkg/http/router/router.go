@@ -9,11 +9,14 @@ import (
 	"github.com/ngfenglong/food-randomizer-BE/pkg/category"
 	"github.com/ngfenglong/food-randomizer-BE/pkg/config"
 	"github.com/ngfenglong/food-randomizer-BE/pkg/location"
+	"github.com/ngfenglong/food-randomizer-BE/pkg/middleware"
 	"github.com/ngfenglong/food-randomizer-BE/pkg/place"
 )
 
 func NewRouter(cfg *config.Config, db *sql.DB) *mux.Router {
 	r := mux.NewRouter()
+
+	r.Use(middleware.EnableCORS)
 
 	// Create Repo
 	authRepo := auth.NewSQLAuthRepository(db)
