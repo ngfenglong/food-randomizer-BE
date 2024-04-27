@@ -28,4 +28,4 @@ jobs:
             git pull
             sudo docker rmi ttm-backend
             sudo docker build -t ttm-backend .
-            sudo docker run -p 9001:9001 --rm -d --name ttm-backend-app ttm-backend
+            sudo docker run -p 9002:9002 --rm -d --name ttm-backend-app ttm-backend
