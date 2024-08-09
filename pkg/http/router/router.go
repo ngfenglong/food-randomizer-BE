@@ -28,7 +28,7 @@ func NewRouter(cfg *config.Config, db *sql.DB) *mux.Router {
 	api := r.PathPrefix("/v1").Subrouter()
 	// api.HandleFunc("/places", auth.PlaceHandler(db)).Methods("GET")
 
-	// Placesx
+	// Places
 	api.HandleFunc("/places", place.GetAllPlaces(placeRepo)).Methods("GET")
 	api.HandleFunc("/places/:id", place.GetPlaceByID(placeRepo)).Methods("GET")
 	api.HandleFunc("/admin/updatePlace", place.EditPlace(placeRepo)).Methods("PUT")
