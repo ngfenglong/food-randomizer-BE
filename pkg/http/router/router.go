@@ -24,7 +24,7 @@ func NewRouter(cfg *config.Config, db *sql.DB) *mux.Router {
 	locationRepo := location.NewSQLLocationRepository(db)
 	placeRepo := place.NewSQLPlaceRepository(db)
 
-	// Handle API
+	// Handle  API
 	api := r.PathPrefix("/v1").Subrouter()
 	// api.HandleFunc("/places", auth.PlaceHandler(db)).Methods("GET")
 
