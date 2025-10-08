@@ -40,23 +40,23 @@ func NewRouter(cfg *config.Config, db *sql.DB) *mux.Router {
 	api.HandleFunc("/admin/categories", category.GetAllCategories(categoryRepo)).Methods("GET")
 	api.HandleFunc("/admin/categories/:id", category.GetCategoryByID(categoryRepo)).Methods("GET")
 	api.HandleFunc("/admin/updateCategory", category.EditCategory(categoryRepo)).Methods("PUT")
-	api.HandleFunc("/v1/admin/deleteCategory/:id", category.DeleteCategory(categoryRepo)).Methods("DELETE")
-	api.HandleFunc("/v1/admin/deleteCategories", category.DeleteCategories(categoryRepo)).Methods("POST")
+	api.HandleFunc("/admin/deleteCategory/:id", category.DeleteCategory(categoryRepo)).Methods("DELETE")
+	api.HandleFunc("/admin/deleteCategories", category.DeleteCategories(categoryRepo)).Methods("POST")
 
 	// Location
-	api.HandleFunc("/v1/admin/locations", location.GetAllLocations(locationRepo)).Methods("GET")
-	api.HandleFunc("/v1/admin/locations/:id", location.GetLocationByID(locationRepo)).Methods("GET")
-	api.HandleFunc("/v1/admin/updateLocation", location.EditLocation(locationRepo)).Methods("PUT")
-	api.HandleFunc("/v1/admin/deleteLocation/:id", location.DeleteLocation(locationRepo)).Methods("DELETE")
-	api.HandleFunc("/v1/admin/deleteLocations", location.DeleteLocations(locationRepo)).Methods("POST")
+	api.HandleFunc("/admin/locations", location.GetAllLocations(locationRepo)).Methods("GET")
+	api.HandleFunc("/admin/locations/:id", location.GetLocationByID(locationRepo)).Methods("GET")
+	api.HandleFunc("/admin/updateLocation", location.EditLocation(locationRepo)).Methods("PUT")
+	api.HandleFunc("/admin/deleteLocation/:id", location.DeleteLocation(locationRepo)).Methods("DELETE")
+	api.HandleFunc("/admin/deleteLocations", location.DeleteLocations(locationRepo)).Methods("POST")
 
-	api.HandleFunc("/v1/auth/login", auth.Login(authRepo)).Methods("POST")
-	api.HandleFunc("/v1/auth/logout", auth.Logout(authRepo)).Methods("POST")
-	api.HandleFunc("/v1/auth/register", auth.Register(authRepo, cfg)).Methods("POST")
-	api.HandleFunc("/v1/auth/forget-password", auth.ForgetPassword(authRepo)).Methods("POST")
+	api.HandleFunc("/auth/login", auth.Login(authRepo)).Methods("POST")
+	api.HandleFunc("/auth/logout", auth.Logout(authRepo)).Methods("POST")
+	api.HandleFunc("/auth/register", auth.Register(authRepo, cfg)).Methods("POST")
+	api.HandleFunc("/auth/forget-password", auth.ForgetPassword(authRepo)).Methods("POST")
 
 	// Telegram_Access
-	api.HandleFunc("/v1/auth/requestAccess", auth.Request_access(authRepo)).Methods("POST")
+	api.HandleFunc("/auth/requestAccess", auth.Request_access(authRepo)).Methods("POST")
 
 	// return app.enableCORS(router)
 
