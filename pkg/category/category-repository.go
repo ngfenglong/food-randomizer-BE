@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -31,7 +30,7 @@ func NewSQLCategoryRepostory(db *sql.DB) *SQLCategoryRepository {
 }
 
 func (repo *SQLCategoryRepository) GetCategoryByID(ctx context.Context, id int) (*models.Category, error) {
-	query := `select id, category_name, created_at, updated_at from category where id = ?`
+	query := `select id, category_name, created_at, updated_at from category where id = $1`
 
 	row := repo.db.QueryRowContext(ctx, query, id)
 	var category models.Category
@@ -49,7 +48,7 @@ func (repo *SQLCategoryRepository) GetCategoryByID(ctx context.Context, id int) 
 }
 
 func (repo *SQLCategoryRepository) GetAllCategories(ctx context.Context) ([]*models.Category, error) {
-	query := fmt.Sprintf(`select id, category_name, created_at, updated_at from category`)
+	query := `select id, category_name, created_at, updated_at from category`
 	rows, err := repo.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -77,7 +76,7 @@ func (repo *SQLCategoryRepository) GetAllCategories(ctx context.Context) ([]*mod
 
 func (repo *SQLCategoryRepository) InsertCategory(ctx context.Context, category models.Category) error {
 	stmt := `
-		insert into category (category_name) value (?)
+		insert into category (category_name) values ($1)
 	`
 
 	_, err := repo.db.ExecContext(ctx, stmt, category.CategoryName)
@@ -90,7 +89,7 @@ func (repo *SQLCategoryRepository) InsertCategory(ctx context.Context, category 
 
 func (repo *SQLCategoryRepository) UpdateCategory(ctx context.Context, category models.Category) error {
 	stmt := `
-		Update category set category_name = ? where id = ?
+		Update category set category_name = $1 where id = $2
 	`
 
 	_, err := repo.db.ExecContext(ctx, stmt, category.CategoryName, category.ID)
@@ -102,7 +101,7 @@ func (repo *SQLCategoryRepository) UpdateCategory(ctx context.Context, category 
 }
 
 func (repo *SQLCategoryRepository) DeleteCategory(ctx context.Context, id int) error {
-	stmt := "Delete from category where id = ?"
+	stmt := "Delete from category where id = $1"
 
 	_, err := repo.db.ExecContext(ctx, stmt, id)
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -33,7 +32,7 @@ func NewSQLLocationRepository(db *sql.DB) *SQLLocationRepository {
 }
 
 func (r *SQLLocationRepository) GetLocationByID(ctx context.Context, id int) (*models.Location, error) {
-	query := `Select id, location_name, created_at, updated_at from location where id = ?`
+	query := `Select id, location_name, created_at, updated_at from location where id = $1`
 
 	row := r.db.QueryRowContext(ctx, query, id)
 	var location models.Location
@@ -51,7 +50,7 @@ func (r *SQLLocationRepository) GetLocationByID(ctx context.Context, id int) (*m
 }
 
 func (r *SQLLocationRepository) GetAllLocations(ctx context.Context) ([]*models.Location, error) {
-	query := fmt.Sprint(`select id, location_name, created_at, updated_at from location`)
+	query := `select id, location_name, created_at, updated_at from location`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -82,7 +81,7 @@ func (r *SQLLocationRepository) InsertLocation(ctx context.Context, location mod
 	defer cancel()
 
 	stmt := `
-		insert into location (location_name) value (?)
+		insert into location (location_name) values ($1)
 	`
 
 	_, err := r.db.ExecContext(ctx, stmt, location.LocationName)
@@ -94,7 +93,7 @@ func (r *SQLLocationRepository) InsertLocation(ctx context.Context, location mod
 
 func (r *SQLLocationRepository) UpdateLocation(ctx context.Context, location models.Location) error {
 	stmt := `
-		Update location set location_name = ?, updated_at = ? where id = ?
+		Update location set location_name = $1, updated_at = $2 where id = $3
 	`
 
 	_, err := r.db.ExecContext(ctx, stmt, location.LocationName, location.UpdatedAt, location.ID)
@@ -106,7 +105,7 @@ func (r *SQLLocationRepository) UpdateLocation(ctx context.Context, location mod
 }
 
 func (r *SQLLocationRepository) DeleteLocation(ctx context.Context, id int) error {
-	stmt := `Delete from location where id = ?`
+	stmt := `Delete from location where id = $1`
 	_, err := r.db.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err

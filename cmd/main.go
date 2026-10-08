@@ -13,7 +13,6 @@ import (
 	"github.com/ngfenglong/food-randomizer-BE/pkg/database"
 	"github.com/ngfenglong/food-randomizer-BE/pkg/http/router"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
 )
 
@@ -35,7 +34,7 @@ func main() {
 	}
 
 	flag.IntVar(&cfg.Server.Port, "port", defaultPort, "Server port to listen on")
-	flag.StringVar(&cfg.Database.DSN, "dsn", viper.GetString("DB_CONNECTIONSTRING"), "mySQL connection string")
+	flag.StringVar(&cfg.Database.DSN, "dsn", viper.GetString("DB_CONNECTIONSTRING"), "Postgres connection string")
 	flag.StringVar(&cfg.SecretCode, "secretCode", viper.GetString("SECRET_CODE"), "registration secret code")
 	flag.StringVar(&cfg.Env, "env", "development", "Application environment (development|production)")
 	flag.StringVar(&cfg.JWT.Secret, "jwt-secret", "2dce505d96a53c5768052ee90f3df2055657518dad489160df9913f66042e160", "secret")
