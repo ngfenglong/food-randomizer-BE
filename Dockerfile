@@ -1,11 +1,13 @@
 # Start from the latest Golang base image
-FROM golang:1.19-alpine
+FROM golang:1.25-alpine
 
 # Install bash
 RUN apk add --no-cache bash
 
 # Add Maintainer info
 LABEL maintainer="Zell <zell_dev@hotmail.com>"
+
+ENV TZ=UTC
 
 # Set the current working directory inside the container
 WORKDIR /app

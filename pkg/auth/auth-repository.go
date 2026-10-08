@@ -54,8 +54,8 @@ func (repo *SQLAuthRepository) GetUserByEmail(ctx context.Context, email string)
 	var u models.User
 	row := repo.db.QueryRowContext(ctx, `
 		Select id, username, email, password, role 
-		From user 
-		Where email = ?
+		From users 
+		Where lower(email) = lower($1)
 	`, email)
 
 	err := row.Scan(
@@ -74,7 +74,7 @@ func (repo *SQLAuthRepository) GetUserByEmail(ctx context.Context, email string)
 
 func (repo *SQLAuthRepository) RegisterUser(ctx context.Context, r RegisterUserDto) error {
 	stmt := `
-		Insert into user (username, email, password, role) value (?, ?, ?, ?)
+		Insert into users (username, email, password, role) values ($1, $2, $3, $4)
 	`
 	_, err := repo.db.ExecContext(ctx, stmt, r.Username, r.Email, r.Password, 0)
 	if err != nil {
@@ -86,7 +86,7 @@ func (repo *SQLAuthRepository) RegisterUser(ctx context.Context, r RegisterUserD
 
 func (repo *SQLAuthRepository) InsertToken(ctx context.Context, userId int, refreshToken string, expiresAt time.Time) error {
 	stmt := `
-		Insert into refresh_token (userId, token, expires_at) value (? , ? , ?)
+		Insert into refresh_token (user_id, token, expires_at) values ($1, $2, $3)
 	`
 	_, err := repo.db.ExecContext(ctx, stmt, userId, refreshToken, expiresAt)
 	if err != nil {
@@ -97,7 +97,7 @@ func (repo *SQLAuthRepository) InsertToken(ctx context.Context, userId int, refr
 }
 
 func (repo *SQLAuthRepository) CheckIfUserExists(ctx context.Context, r RegisterUserDto) (usernameCheck, emailCheck bool, err error) {
-	checkUsernameStmt := `Select Count(*) From user Where username = ?`
+	checkUsernameStmt := `Select Count(*) From users Where lower(username) = lower($1)`
 	row := repo.db.QueryRowContext(ctx, checkUsernameStmt, r.Username)
 
 	var count int
@@ -110,7 +110,7 @@ func (repo *SQLAuthRepository) CheckIfUserExists(ctx context.Context, r Register
 		return true, false, nil
 	}
 
-	checkEmailStmt := `Select Count(*) From user Where email = ?`
+	checkEmailStmt := `Select Count(*) From users Where lower(email) = lower($1)`
 	row = repo.db.QueryRowContext(ctx, checkEmailStmt, r.Email)
 	err = row.Scan(&count)
 	if err != nil {
@@ -124,7 +124,7 @@ func (repo *SQLAuthRepository) CheckIfUserExists(ctx context.Context, r Register
 }
 
 func (repo *SQLAuthRepository) DeleteToken(ctx context.Context, refreshToken string) error {
-	stmt := `Delete from refresh_token where token = ?`
+	stmt := `Delete from refresh_token where token = $1`
 	_, err := repo.db.ExecContext(ctx, stmt, refreshToken)
 	if err != nil {
 		return err
@@ -135,7 +135,7 @@ func (repo *SQLAuthRepository) DeleteToken(ctx context.Context, refreshToken str
 
 func (repo *SQLAuthRepository) IsAdminRequestPending(ctx context.Context, ar AdminRequestDto) (bool, error) {
 	var count int
-	checkRequestStmt := `SELECT count(*) FROM admin_request WHERE telegram_id = ?`
+	checkRequestStmt := `SELECT count(*) FROM admin_request WHERE telegram_id = $1`
 	row := repo.db.QueryRowContext(ctx, checkRequestStmt, ar.TelegramID)
 	err := row.Scan(&count)
 	if err != nil {
@@ -149,7 +149,7 @@ func (repo *SQLAuthRepository) IsAdminRequestPending(ctx context.Context, ar Adm
 }
 
 func (repo *SQLAuthRepository) RegisterRequest(ctx context.Context, teleId, teleUsername string) error {
-	stmt := `INSERT INTO admin_request(telegram_id, telegram_username) VALUE (?,?)`
+	stmt := `INSERT INTO admin_request(telegram_id, telegram_username) VALUES ($1,$2)`
 	_, err := repo.db.ExecContext(ctx, stmt, teleId, teleUsername)
 	if err != nil {
 		return err

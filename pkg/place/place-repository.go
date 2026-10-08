@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -33,7 +32,7 @@ func NewSQLPlaceRepository(db *sql.DB) *SQLPlaceRepository {
 }
 
 func (r *SQLPlaceRepository) GetPlaceByID(ctx context.Context, id int) (*models.Place, error) {
-	query := `select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place where id = ?`
+	query := `select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place where id = $1`
 
 	row := r.db.QueryRowContext(ctx, query, id)
 	var place models.Place
@@ -58,14 +57,18 @@ func (r *SQLPlaceRepository) GetPlaceByID(ctx context.Context, id int) (*models.
 }
 
 func (r *SQLPlaceRepository) GetAllPlaces(ctx context.Context, category ...string) ([]*models.Place, error) {
-	where := ""
-	if len(category) > 0 {
-		println(category)
-		where = fmt.Sprintf("where category =  %s)", category)
+	// A nil parameter means "no category filter"; passing a value filters on it.
+	query := `select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category
+	              from place
+	              where ($1::varchar is null or category = $1)
+	              order by name`
+
+	var cat *string
+	if len(category) > 0 && category[0] != "" {
+		cat = &category[0]
 	}
 
-	query := fmt.Sprintf(`select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place %s order by name`, where)
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query, cat)
 	if err != nil {
 		return nil, err
 	}
@@ -98,21 +101,15 @@ func (r *SQLPlaceRepository) GetAllPlaces(ctx context.Context, category ...strin
 }
 
 func (r *SQLPlaceRepository) GetAllPlacesWithFilter(ctx context.Context, isHalal, isVegetarian bool) ([]*models.Place, error) {
-	where := ""
-	if isHalal {
-		where = fmt.Sprintf("where is_halal = 1")
-	}
+	// is_halal / is_vegetarian are real booleans in Postgres, so compare as
+	// booleans rather than against 1. Each flag is only applied when requested.
+	query := `select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category
+	              from place
+	              where (not $1::boolean or is_halal)
+	                and (not $2::boolean or is_vegetarian)
+	              order by name`
 
-	if isVegetarian {
-		if len(where) > 0 {
-			where += fmt.Sprintf(" and is_vegetarian = 1")
-		} else {
-			where = fmt.Sprintf("where is_vegetarian = 1")
-		}
-	}
-
-	query := fmt.Sprintf(`select id, name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category from place %s order by name`, where)
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query, isHalal, isVegetarian)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +145,7 @@ func (r *SQLPlaceRepository) InsertPlace(ctx context.Context, place models.Place
 	stmt := `
 		insert into place 
 		(name, description, is_halal, is_vegetarian, location, lat, lon, created_at, updated_at, category) 
-		values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`
 
 	_, err := r.db.ExecContext(ctx, stmt,
@@ -171,7 +168,7 @@ func (r *SQLPlaceRepository) InsertPlace(ctx context.Context, place models.Place
 }
 
 func (r *SQLPlaceRepository) UpdatePlace(ctx context.Context, place models.Place) error {
-	stmt := `Update place set name = ?, description = ?, is_halal = ?, is_vegetarian = ?, location = ?, lat = ?, lon = ?, created_at = ? , updated_at = ? , category = ? where id = ?`
+	stmt := `Update place set name = $1, description = $2, is_halal = $3, is_vegetarian = $4, location = $5, lat = $6, lon = $7, created_at = $8, updated_at = $9, category = $10 where id = $11`
 
 	_, err := r.db.ExecContext(ctx, stmt,
 		place.Name,
@@ -195,7 +192,7 @@ func (r *SQLPlaceRepository) UpdatePlace(ctx context.Context, place models.Place
 }
 
 func (r *SQLPlaceRepository) DeletePlace(ctx context.Context, id int) error {
-	stmt := "Delete from place where id = ?"
+	stmt := "Delete from place where id = $1"
 
 	_, err := r.db.ExecContext(ctx, stmt, id)
 	if err != nil {
